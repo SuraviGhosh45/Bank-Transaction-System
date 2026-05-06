@@ -1,4 +1,5 @@
 const mongoose=require('mongoose');
+const bcrypt=require('bcryptjs')
 
 
 //schema created 
@@ -28,19 +29,20 @@ const userSchema=new mongoose.Schema({
 })
 
 // this function runs before saving a new user to check if the password changed and hashed
-userSchema.pre("save",async function(next) {
-    if(!this.isModified("password")){
-        return next()
-    }
-    const hashed=bcrypt.hash(this.password,10)
-    this.password=hashed
-    return next()
-})
+userSchema.pre('save', async function () {
+    // If password isn't new or changed, don't hash it again!
+    if (!this.isModified('password')) return ; 
+
+    this.password = await bcrypt.hash(this.password, 10);
+});
+
 
 // this funtion is to compare the hashed password are same or not
-userSchema.methods.comparePassword = async function (password) {
-    return bcrypt.compare(this.password,password)
-}
+userSchema.methods.comparePassword = async function (plainPassword) {
+    // 'this.password' is the hashed one from the DB
+    return await bcrypt.compare(plainPassword, this.password);
+};
+
 
 //Creating Model 
 

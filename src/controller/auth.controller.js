@@ -1,5 +1,6 @@
 const userModel = require('../models/user.model')
 const jwt = require('jsonwebtoken')
+const emailService=require('../services/email.service');
 
 /** 
 
@@ -37,6 +38,9 @@ async function userRegistrationController(req, res) {
             secure: process.env.NODE_ENV === 'production', // Only HTTPS in production
             maxAge: 3 * 24 * 60 * 60 * 1000 // 3 days in milliseconds
         })
+
+        //Sending Registration Mail
+        await emailService.sendingRegistrationEmail(user.email,user.name)
 
         //giving response to the user
         res.status(201).json({
@@ -103,6 +107,7 @@ async function userLoginController(req, res) {
             maxAge: 3 * 24 * 60 * 60 * 1000 // 3 days in milliseconds
         })
 
+
         //giving response
         res.status(200).json({
             success: true,
@@ -113,6 +118,8 @@ async function userLoginController(req, res) {
             },
             message: "User found successfully"
         })
+        //Sending Login Email
+        await emailService.sendingLoginEmail(user.email,user.name);
 
     } catch (error) {
         return res.status(500).json({
